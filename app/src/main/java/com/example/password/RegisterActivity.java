@@ -36,25 +36,21 @@ public class RegisterActivity extends AppCompatActivity {
 
         Log.d("RegisterActivity", "Попытка регистрации: " + username);
 
-        // Проверка на заполненность полей
         if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             Toast.makeText(this, "Пожалуйста, заполните все поля", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Проверка, существует ли пользователь
         if (databaseHelper.userExists(username)) {
             Toast.makeText(this, "Логин уже занят", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Проверка совпадения паролей
         if (!password.equals(confirmPassword)) {
             Toast.makeText(this, "Пароли не совпадают", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Сохранение нового пользователя
         boolean isAdded = databaseHelper.addUser (new UserEntry(username, password));
 
         if (isAdded) {
