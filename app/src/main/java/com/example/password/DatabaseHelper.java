@@ -61,7 +61,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             values.put(COLUMN_USER_PASSWORD, userEntry.getPassword());
 
             long result = db.insert(TABLE_USERS, null, values);
-            return result != -1;  // true if insertion succeeded
+            return result != -1;
         } catch (Exception e) {
             Log.e("DatabaseHelper", "Error adding user", e);
             return false;
