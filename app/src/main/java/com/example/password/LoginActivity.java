@@ -40,7 +40,6 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        // Проверка учетных данных пользователя
         if (databaseHelper.validateUser (username, password)) {
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             startActivity(intent);
