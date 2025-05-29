@@ -1,5 +1,8 @@
 package com.example.password;
 
+import java.io.Serializable;
+import java.util.Objects;
+
 public class PasswordEntry {
     private final String serviceName;
     private final String login;
@@ -28,4 +31,19 @@ public class PasswordEntry {
     public String getNotes() {
         return notes;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        PasswordEntry that = (PasswordEntry) obj;
+        return serviceName.equals(that.serviceName) && login.equals(that.login);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(serviceName, login);
+    }
+
+
 }

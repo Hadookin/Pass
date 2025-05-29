@@ -1,7 +1,6 @@
 package com.example.password;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -10,13 +9,14 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.gson.Gson;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String PREFS_NAME = "passwords";
+    private DatabaseHelper databaseHelper;
     private final ArrayList<PasswordEntry> originalPasswordEntries = new ArrayList<>();
     private PasswordAdapter adapter;
 
@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
         EditText searchEditText = findViewById(R.id.searchEditText);
         Button buttonAddPassword = findViewById(R.id.buttonAddPassword);
 
+        databaseHelper = new DatabaseHelper(this);
         loadPasswords();
         adapter = new PasswordAdapter(this, originalPasswordEntries);
         listView.setAdapter(adapter);
@@ -62,19 +63,10 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
     }
-
     private void loadPasswords() {
-        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        Map<String, ?> allEntries = sharedPreferences.getAll();
-        Gson gson = new Gson();
-
         originalPasswordEntries.clear();
-
-        for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
-            String json = (String) entry.getValue();
-            PasswordEntry passwordEntry = gson.fromJson(json, PasswordEntry.class);
-            originalPasswordEntries.add(passwordEntry);
-        }
+        List<PasswordEntry> passwords = databaseHelper.getAllPasswords();
+        originalPasswordEntries.addAll(passwords);
     }
 
     private void filterPasswords(String query) {

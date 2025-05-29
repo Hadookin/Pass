@@ -1,20 +1,17 @@
 package com.example.password;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
+import android.text.InputType;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import com.google.gson.Gson;
 
 public class AddPasswordActivity extends AppCompatActivity {
 
     private EditText editTextService, editTextLogin, editTextPassword, editTextNotes;
-    private SharedPreferences sharedPreferences;
-    private static final String PREFS_NAME = "passwords";
+    private DatabaseHelper databaseHelper;
     private boolean isPasswordVisible = false;
 
     @Override
@@ -28,7 +25,8 @@ public class AddPasswordActivity extends AppCompatActivity {
         editTextNotes = findViewById(R.id.editTextNotes);
         Button buttonSave = findViewById(R.id.buttonSave);
         ImageView buttonTogglePassword = findViewById(R.id.buttonTogglePassword);
-        sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+
+        databaseHelper = new DatabaseHelper(this);
 
         buttonTogglePassword.setOnClickListener(v -> togglePasswordVisibility());
 
@@ -37,43 +35,34 @@ public class AddPasswordActivity extends AppCompatActivity {
 
     private void togglePasswordVisibility() {
         if (isPasswordVisible) {
-            editTextPassword.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            editTextPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
             isPasswordVisible = false;
         } else {
-            editTextPassword.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+            editTextPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
             isPasswordVisible = true;
         }
         editTextPassword.setSelection(editTextPassword.length());
     }
 
     private void savePassword() {
-        String service = editTextService.getText().toString();
-        String login = editTextLogin.getText().toString();
-        String password = editTextPassword.getText().toString();
-        String notes = editTextNotes.getText().toString();
+        String service = editTextService.getText().toString().trim();
+        String login = editTextLogin.getText().toString().trim();
+        String password = editTextPassword.getText().toString().trim();
+        String notes = editTextNotes.getText().toString().trim();
 
         if (validateInputs(service, login, password)) {
             PasswordEntry newEntry = new PasswordEntry(service, login, password, notes);
-            String json = new Gson().toJson(newEntry);
-            sharedPreferences.edit().putString(service, json).apply();
-            Toast.makeText(this, "Пароль успешно сохранён", Toast.LENGTH_SHORT).show();
-            finish();
+            long id = databaseHelper.addPassword(newEntry);
+            if (id != -1) {
+                Toast.makeText(this, "Пароль успешно сохранён", Toast.LENGTH_SHORT).show();
+                finish();
+            } else {
+                Toast.makeText(this, "Ошибка при сохранении пароля", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
     private boolean validateInputs(String service, String login, String password) {
-        if (service.isEmpty()) {
-            Toast.makeText(this, "Введите название сервиса", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        if (login.isEmpty()) {
-            Toast.makeText(this, "Введите логин", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        if (password.isEmpty()) {
-            Toast.makeText(this, "Введите пароль", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-        return true;
+        return !service.isEmpty() && !login.isEmpty() && !password.isEmpty();
     }
 }
